@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "MenuSystem/MenuInterface.h"
 #include "PuzzlePlatformsGameInstance.generated.h"
 
 /**
  * 
  */
+// Inherit the Interface.
 UCLASS()
-class PUZZLEPLATFORM_API UPuzzlePlatformsGameInstance : public UGameInstance
+class PUZZLEPLATFORM_API UPuzzlePlatformsGameInstance : public UGameInstance, public IMenuInterface
 {
 	GENERATED_BODY()
 
@@ -19,9 +21,17 @@ public:
 	
 	virtual void Init();
 
+	UFUNCTION(Exec, BlueprintCallable)
+	void LoadMenu();
+
 	UFUNCTION(Exec)
 	void Host();
 
 	UFUNCTION(Exec)
-	void Join(const FString& address);
+	void JoinServer(const FString& address);
+
+private:
+	TSubclassOf<class UUserWidget> MenuClass;
+
+	class UMyUserWidget* Menu;
 };

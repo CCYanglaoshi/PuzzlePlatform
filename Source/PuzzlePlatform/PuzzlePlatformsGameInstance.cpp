@@ -2,19 +2,54 @@
 
 
 #include "PuzzlePlatformsGameInstance.h"
+#include <UObject/ConstructorHelpers.h>
+#include "PlatformTrigger.h"
+#include "Blueprint/UserWidget.h"
+#include "Menusystem/MyUserWidget.h"
+
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance Constructor"));
+	UE_LOG(LogTemp, Warning, TEXT("Found Class ?????"));
+	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MainMenu"));
+	if (MenuBPClass.Class == nullptr)
+	{
+		return;
+	}
+	MenuClass = MenuBPClass.Class;
 }
 
 void UPuzzlePlatformsGameInstance::Init()
 {
-	UE_LOG(LogTemp, Warning, TEXT("GameInstance Initial"));
+	UE_LOG(LogTemp, Warning, TEXT("Found Class: %s"), *MenuClass->GetName());
+}
+
+void UPuzzlePlatformsGameInstance::LoadMenu()
+{
+	if (MenuClass == nullptr)
+	{
+		return;
+	}
+	Menu = CreateWidget<UMyUserWidget>(this, MenuClass);
+	if (Menu == nullptr)
+	{
+		return;
+	}
+	
+	Menu->Setup();
+
+	// here is very import. tweak the UserWidet>Interface>Gameinstance.
+	// why use ¡°this"£¿ because this inteface is inherit by this Gameinstace.
+	Menu->SetMenuInterface(this);
 }
 
 void UPuzzlePlatformsGameInstance::Host()
 {
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+	
 	UEngine* Engine = GetEngine();
 	if (Engine == nullptr)
 	{
@@ -32,7 +67,7 @@ void UPuzzlePlatformsGameInstance::Host()
 	World->ServerTravel("/Game/ThirdPerson/Maps/ThirdPersonMap?listen");
 }
 
-void UPuzzlePlatformsGameInstance::Join(const FString& address)
+void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 {
 	UEngine* Engine = GetEngine();
 	if (Engine == nullptr)
