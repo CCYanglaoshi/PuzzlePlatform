@@ -6,17 +6,26 @@
 #include "PlatformTrigger.h"
 #include "Blueprint/UserWidget.h"
 #include "Menusystem/MyUserWidget.h"
+#include "Menusystem/MenuWidget.h"
 
 
 UPuzzlePlatformsGameInstance::UPuzzlePlatformsGameInstance(const FObjectInitializer& ObjectInitializer)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Found Class ?????"));
+	
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MainMenu"));
 	if (MenuBPClass.Class == nullptr)
 	{
 		return;
 	}
 	MenuClass = MenuBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> InGameMenuBPClass(TEXT("/Game/MenuSystem/WBP_InGameMenu"));
+	if (InGameMenuBPClass.Class == nullptr)
+	{
+		return;
+	}
+	InGameMenuClass = InGameMenuBPClass.Class;
 }
 
 void UPuzzlePlatformsGameInstance::Init()
@@ -42,6 +51,27 @@ void UPuzzlePlatformsGameInstance::LoadMenu()
 	// why use ¡°this"£¿ because this inteface is inherit by this Gameinstace.
 	Menu->SetMenuInterface(this);
 }
+
+void UPuzzlePlatformsGameInstance::InGameLoadMenu()
+{
+	if (InGameMenuClass == nullptr)
+	{
+		return;
+	}
+	UMenuWidget* InGameMenu = CreateWidget<UMenuWidget>(this, InGameMenuClass);
+	if (InGameMenu == nullptr)
+	{
+		return;
+	}
+
+	InGameMenu->Setup();
+
+	// here is very import. tweak the UserWidet>Interface>Gameinstance.
+	// why use ¡°this"£¿ because this inteface is inherit by this Gameinstace.
+	InGameMenu->SetMenuInterface(this);
+}
+
+
 
 void UPuzzlePlatformsGameInstance::Host()
 {
@@ -69,6 +99,12 @@ void UPuzzlePlatformsGameInstance::Host()
 
 void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 {
+
+	if (Menu != nullptr)
+	{
+		Menu->Teardown();
+	}
+
 	UEngine* Engine = GetEngine();
 	if (Engine == nullptr)
 	{
@@ -84,5 +120,15 @@ void UPuzzlePlatformsGameInstance::JoinServer(const FString& address)
 	Engine->AddOnScreenDebugMessage(0, 2, FColor::Green, FString::Printf(TEXT("String join : %s"), *address));
 	PlayerController->ClientTravel(address, ETravelType::TRAVEL_Absolute);
 
+}
+
+void UPuzzlePlatformsGameInstance::LoadMainMenu()
+{
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (PlayerController == nullptr)
+	{
+		return;
+	}
+	PlayerController->ClientTravel("/Game/ThirdPerson/Maps/MainMenu", ETravelType::TRAVEL_Absolute);
 }
 

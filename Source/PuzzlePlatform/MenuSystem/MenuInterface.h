@@ -30,6 +30,8 @@ public:
 	// here function need same with gameinstance.h
 	virtual void JoinServer(const FString& address) = 0;
 
+	virtual void LoadMainMenu() = 0;
+
 };
 
 

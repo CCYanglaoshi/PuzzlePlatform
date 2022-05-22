@@ -6,54 +6,6 @@
 #include <Components/WidgetSwitcher.h>
 #include "Components/EditableTextBox.h"
 
-void UMyUserWidget::SetMenuInterface(IMenuInterface* InMenuInterface)
-{
-	this->MenuInterface = InMenuInterface;
-}
-
-void UMyUserWidget::Setup()
-{
-	this->AddToViewport();
-
-	UWorld* World = GetWorld();
-	if (World != nullptr)
-	{
-		return;
-	}
-
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (PlayerController == nullptr)
-	{
-		return;
-	}
-
-	FInputModeUIOnly InData;
-	InData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-	InData.SetWidgetToFocus(this->TakeWidget());
-	PlayerController->SetInputMode(InData);
-
-	PlayerController->bShowMouseCursor = true;
-}
-
-void UMyUserWidget::Teardown()
-{
-	UWorld* World = GetWorld();
-	if (World != nullptr)
-	{
-		return;
-	}
-	APlayerController* PlayerController = World->GetFirstPlayerController();
-	if (PlayerController == nullptr)
-	{
-		return;
-	}
-	PlayerController->bShowMouseCursor = false;
-
-	FInputModeGameOnly InData;
-	PlayerController->SetInputMode(InData);
-
-	this->RemoveFromViewport();
-}
 
 bool UMyUserWidget::Initialize()
 {
@@ -73,9 +25,9 @@ bool UMyUserWidget::Initialize()
 
 void UMyUserWidget::HostServer()
 {
-	if (MenuInterface != nullptr)
+	if (InMenuInterface != nullptr)
 	{
-		MenuInterface->Host();
+		InMenuInterface->Host();
 	}
 }
 
@@ -83,9 +35,9 @@ void UMyUserWidget::HostServer()
 void UMyUserWidget::JoinServer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("JoinServer Starting"));
-	if (MenuInterface != nullptr)
+	if (InMenuInterface != nullptr)
 	{
-		MenuInterface->JoinServer(IPAddressField->GetText().ToString());
+		InMenuInterface->JoinServer(IPAddressField->GetText().ToString());
 	}
 
 }
